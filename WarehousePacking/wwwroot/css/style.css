@@ -1,0 +1,314 @@
+﻿body {
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+#InputInfo {
+    width: 50vw;
+    height: 100vh;
+    overflow-y: scroll;
+}
+
+#PreView {
+    width: 50%;
+}
+
+.stepbtn {
+    position: absolute;
+    top: 50%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    width: 2.5%;
+    height: 5%;
+}
+
+.stepbtn:hover {
+    cursor: pointer;
+    opacity: 0.2;
+}
+
+#backbtn {
+    left: 3%
+}
+
+#gobtn {
+    right: 3%;
+}
+
+#modaltitle {
+    font-family: Noto Sans;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 24px;
+    color: #000000;
+}
+
+#closemodal:hover {
+    cursor: pointer;
+    opacity: 0.2;
+}
+
+#ContainerInfo {
+    margin-top: 3%;
+    margin-left: 3%;
+}
+
+#CargoInfo {
+    margin-top: 3%;
+    margin-left: 3%;
+}
+
+::placeholder {
+    font-family: Noto Sans KR;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 20px;
+    color: #BABCBF;
+    flex: none;
+    order: 0;
+    flex-grow: 1;
+    margin: 0px 16px;
+}
+
+.infotitle {
+    font-family: Noto Sans;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 33px;
+    margin-top: 2%;
+    margin-left: 2%;
+}
+
+.infolabel {
+    width: 32px;
+    height: 20px;
+    font-family: Noto Sans KR;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    color: #262727;
+}
+
+.inputfield {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 110px;
+    height: 40px;
+    background: #FFFFFF;
+    border: 1px solid #BABCBF;
+    box-sizing: border-box;
+    border-radius: 4px;
+    margin: 2px 2px;
+}
+
+.countcol {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 30px;
+}
+
+.resultview {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 96px;
+    height: 40px;
+    background: #262727;
+    border: 2px solid #262727;
+    border-radius: 4px;
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+}
+
+.resultview:hover {
+    background-color: white;
+    cursor: pointer;
+}
+
+.resultview:hover div {
+    color: black;
+    cursor: pointer;
+}
+
+#CalculatePacking {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 96px;
+    height: 40px;
+    background: #262727;
+    border: 2px solid #262727;
+    border-radius: 4px;
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+    margin-top: 3%;
+    margin-left: 88%;
+}
+
+#CalculatePacking:hover {
+    background-color: white;
+    cursor: pointer;
+}
+
+#CalculatePacking:hover div {
+    color: black;
+    cursor: pointer;
+}
+
+.resultbtntext {
+    font-family: Noto Sans KR;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 20px;
+    color: #FFFFFF;
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+}
+
+.deleterow {
+    margin-left: 13px;
+}
+
+.deleterow:hover {
+    cursor: pointer;
+    opacity: 0.2;
+}
+
+#hidecontainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 96px;
+    height: 40px;
+    background: #262727;
+    border: 2px solid #262727;
+    border-radius: 4px;
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+    margin-left: 50%;
+}
+
+#hidecontainer:hover {
+    background-color: white;
+    cursor: pointer;
+}
+
+#hidecontainer:hover div {
+    color: black;
+    cursor: pointer;
+}
+
+#AddContainer {
+    font-family: Noto Sans KR;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 20px;
+    color: #262727;
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+    margin-top: 2%;
+    margin-left: 2%;
+    cursor: pointer;
+    width: 14%;
+}
+
+#AddContainer:hover {
+    cursor: pointer;
+    opacity: 0.2;
+}
+
+#AddCargo {
+    font-family: Noto Sans KR;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 20px;
+    color: #262727;
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+    margin-top: 2%;
+    margin-left: 2%;
+    cursor: pointer;
+    width: 11%;
+}
+
+#AddCargo:hover {
+    cursor: pointer;
+    opacity: 0.2;
+}
+
+.divider {
+    margin-top: 3%;
+    margin-left: auto;
+    margin-right: auto;
+    width: 96%;
+    border-top: 2px solid black;
+    opacity: 0.1;
+}
+
+#PackingAdditionalInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 96%;
+    background: #F7F8FC;
+    border-radius: 8px;
+    margin-top: 3%;
+    margin-left: 2%;
+}
+
+#AdditionalTable {
+    width: 96%;
+    margin: 2% 2%;
+    /* border: 2px solid black; */
+}
+
+#AdditionalTable tr:nth-child(odd) {
+    background-color: #FFFFFF;
+}
+
+#AdditionalTable td {
+    border: 1px, solid black;
+    width: 20%;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
