@@ -261,11 +261,6 @@ namespace WarehousePacking.Models
                     }
 
                     Candidate candid = new Candidate(0, pivot);
-                    ////////
-                    // Console.WriteLine("pivot: " + pivot[0] + " " + pivot[1] + " " + pivot[2]);
-                    // Console.WriteLine("rotation: " + i);
-                    // Console.WriteLine("+++");
-                    ////////
                     if(pivot[0] == 0)
                     {
                         candid.plus_area(dimension[1] * dimension[2]);
