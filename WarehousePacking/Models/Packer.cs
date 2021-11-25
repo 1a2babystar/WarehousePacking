@@ -5,6 +5,10 @@ using System.Threading.Tasks;
 
 namespace WarehousePacking.Models
 {
+    interface PackerFuncs
+    {
+        public void pack(bool bigger_first = false, bool distribute_items = false, int number_of_decimals = Utils.DEFAULT_NUMBER_OF_DECIMALS);
+    }
     public class Item
     {
         public string name { get; set; }
@@ -95,13 +99,13 @@ namespace WarehousePacking.Models
         public List<decimal> get_dimension()
         {
             List<decimal> dimension = new List<decimal> { };
-            if(this.rotation_type == RotationType.RT_WHD)
+            if (this.rotation_type == RotationType.RT_WHD)
             {
                 dimension.Add(this.width);
                 dimension.Add(this.height);
                 dimension.Add(this.depth);
             }
-            else if(this.rotation_type == RotationType.RT_HWD)
+            else if (this.rotation_type == RotationType.RT_HWD)
             {
                 dimension.Add(this.height);
                 dimension.Add(this.width);
@@ -177,7 +181,7 @@ namespace WarehousePacking.Models
         public decimal get_bin_vol_usage()
         {
             decimal total_volume = 0;
-            foreach(Item item in this.items)
+            foreach (Item item in this.items)
             {
                 total_volume += item.get_volume();
             }
@@ -188,12 +192,12 @@ namespace WarehousePacking.Models
         {
             decimal fit_volume = 0;
             decimal total_volume = 0;
-            foreach(Item item in this.items)
+            foreach (Item item in this.items)
             {
                 fit_volume += item.get_volume();
                 total_volume += item.get_volume();
             }
-            foreach(Item item in this.unfitted_items)
+            foreach (Item item in this.unfitted_items)
             {
                 total_volume += item.get_volume();
             }
@@ -218,131 +222,11 @@ namespace WarehousePacking.Models
         public decimal get_total_weight()
         {
             decimal total_weight = 0;
-            foreach(Item item in this.items)
+            foreach (Item item in this.items)
             {
                 total_weight += item.weight;
             }
             return total_weight;
-        }
-
-        public bool put_item(Item item, List<decimal> pivot)
-        {
-            bool fit = false;
-            List<decimal> valid_item_position = item.position;
-            item.position = pivot;
-
-            foreach(int i in item.rotation_allow)
-            {
-                item.rotation_type = i;
-                List<decimal> dimension = item.get_dimension();
-
-                if(this.width < pivot[0] + dimension[0] | this.height < pivot[1] + dimension[1] | this.depth < pivot[2] + dimension[2])
-                {
-                    continue;
-                }
-
-                fit = true;
-
-                foreach(Item current_item_in_bin in this.items)
-                {
-                    if(Utils.intersect(current_item_in_bin, item))
-                    {
-                        fit = false;
-                        break;
-                    }
-                }
-
-                if (fit)
-                {
-                    if(this.get_total_weight() + item.weight > this.max_weight)
-                    {
-                        fit = false;
-                        return fit;
-                    }
-
-                    Candidate candid = new Candidate(0, pivot);
-                    if(pivot[0] == 0)
-                    {
-                        candid.plus_area(dimension[1] * dimension[2]);
-                    }
-                    else
-                    {
-                        foreach(Item it in this.items)
-                        {
-                            List<decimal> idim = it.get_dimension();
-                            if(idim[0] + it.position[0] == pivot[0])
-                            {
-                                decimal tmpx1 = idim[1] + it.position[1] - pivot[1];
-                                decimal tmpy1 = idim[2] + it.position[2] - pivot[2];
-                                decimal tmpx2 = dimension[1] + pivot[1] - it.position[1];
-                                decimal tmpy2 = dimension[2] + pivot[2] - it.position[2];
-                                decimal wid = new decimal[] { tmpx1, tmpx2, idim[1], dimension[1] }.Min();
-                                decimal hei = new decimal[] { tmpy1, tmpy2, idim[2], dimension[2] }.Min();
-                                decimal w = Math.Max(wid, 0);
-                                decimal h = Math.Max(hei, 0);
-                                candid.plus_area(w * h);
-                            }
-                        }
-                    }
-
-                    if (pivot[1] == 0)
-                    {
-                        candid.plus_area(dimension[0] * dimension[2]);
-                    }
-                    else
-                    {
-                        foreach (Item it in this.items)
-                        {
-                            List<decimal> idim = it.get_dimension();
-                            if (idim[1] + it.position[1] == pivot[1])
-                            {
-                                decimal tmpx1 = idim[0] + it.position[0] - pivot[0];
-                                decimal tmpy1 = idim[2] + it.position[2] - pivot[2];
-                                decimal tmpx2 = dimension[0] + pivot[0] - it.position[0];
-                                decimal tmpy2 = dimension[2] + pivot[2] - it.position[2];
-                                decimal wid = new decimal[] { tmpx1, tmpx2, idim[0], dimension[0] }.Min();
-                                decimal hei = new decimal[] { tmpy1, tmpy2, idim[2], dimension[2] }.Min();
-                                decimal w = Math.Max(wid, 0);
-                                decimal h = Math.Max(hei, 0);
-                                candid.plus_area(w * h);
-                            }
-                        }
-                    }
-
-                    if (pivot[2] == 0)
-                    {
-                        candid.plus_area(dimension[0] * dimension[1]);
-                    }
-                    else
-                    {
-                        foreach (Item it in this.items)
-                        {
-                            List<decimal> idim = it.get_dimension();
-                            if (idim[2] + it.position[2] == pivot[2])
-                            {
-                                decimal tmpx1 = idim[0] + it.position[0] - pivot[0];
-                                decimal tmpy1 = idim[1] + it.position[1] - pivot[1];
-                                decimal tmpx2 = dimension[0] + pivot[0] - it.position[0];
-                                decimal tmpy2 = dimension[1] + pivot[1] - it.position[1];
-                                decimal wid = new decimal[] { tmpx1, tmpx2, idim[0], dimension[0] }.Min();
-                                decimal hei = new decimal[] { tmpy1, tmpy2, idim[1], dimension[1] }.Min();
-                                decimal w = Math.Max(wid, 0);
-                                decimal h = Math.Max(hei, 0);
-                                candid.plus_area(w * h);
-                            }
-                        }
-                    }
-
-                    candid.position = pivot;
-                    candid.rotate = i;
-                    item.candidate.Add(candid);
-                }
-            }
-            if (!fit)
-            {
-                item.position = valid_item_position;
-            }
-            return fit;
         }
     }
 
@@ -352,12 +236,29 @@ namespace WarehousePacking.Models
         public List<Item> items { get; set; }
         public List<Item> unfit_items { get; set; }
         public int total_items { get; set; }
-        public Packer()
+        public Packer(RequestInfo requestinfo)
         {
             this.bins = new List<Bin>();
             this.items = new List<Item>();
             this.unfit_items = new List<Item>();
             this.total_items = 0;
+            List<Container> containerinfo = requestinfo.ContainerInfo;
+            List<Cargo> cargoinfo = requestinfo.CargoInfo;
+            List<BinInfo> retlist = new List<BinInfo>();
+
+            foreach (Container container in containerinfo)
+            {
+                this.add_bin(new Bin(container.ContainerName, (decimal)container.ContainerWidth, (decimal)container.ContainerHeight, (decimal)container.ContainerDepth, (decimal)container.ContainerMaxWeight, container.ContainerIndex));
+            }
+
+            foreach (Cargo cargo in cargoinfo)
+            {
+                int count = cargo.CargoCount;
+                for (var i = 0; i < count; i++)
+                {
+                    this.add_item(new Item(cargo.CargoName, (decimal)cargo.CargoWidth, (decimal)cargo.CargoHeight, (decimal)cargo.CargoDepth, (decimal)cargo.CargoWeight, cargo.CargoRotationInfo));
+                }
+            }
         }
         public void add_bin(Bin bin)
         {
@@ -368,114 +269,16 @@ namespace WarehousePacking.Models
             this.total_items = this.items.Count + 1;
             this.items.Add(item);
         }
-
-        public void pack_to_bin(Bin bin, Item item)
+        public List<BinInfo> Result()
         {
-            if(bin.items.Count == 0)
+            List<BinInfo> retlist = new List<BinInfo>();
+
+            foreach (Bin bin in this.bins)
             {
-                bin.put_item(item, Utils.START_POSITION);
+                retlist.Add(bin.result);
             }
 
-            foreach(int axis in Axis.ALL)
-            {
-                List<Item> items_in_bin = bin.items;
-                foreach(Item ib in items_in_bin)
-                {
-                    List<decimal> pivot = new List<decimal> { 0, 0, 0 };
-                    List<decimal> di = ib.get_dimension();
-                    decimal w, h, d;
-                    w = di[0];
-                    h = di[1];
-                    d = di[2];
-                    if(axis == Axis.WIDTH)
-                    {
-                        pivot[0] = ib.position[0] + w;
-                        pivot[1] = ib.position[1];
-                        pivot[2] = ib.position[2];
-                    }
-                    else if(axis == Axis.HEIGHT)
-                    {
-                        pivot[0] = ib.position[0];
-                        pivot[1] = ib.position[1] + h;
-                        pivot[2] = ib.position[2];
-                    }
-                    else if(axis == Axis.DEPTH)
-                    {
-                        pivot[0] = ib.position[0];
-                        pivot[1] = ib.position[1];
-                        pivot[2] = ib.position[2] + d;
-                    }
-                    bin.put_item(item, pivot);
-                }
-
-            }
-            if(item.candidate.Count == 0)
-            {
-                bin.unfitted_items.Add(item);
-            }
-            else
-            {
-                List<Candidate> t = item.candidate.OrderByDescending(c => c.redu_area).ThenBy(c => c.position[2]).ThenBy(c => c.position[0]).ToList();
-                Candidate candid = t[0];
-                item.rotation_type = candid.rotate;
-                item.position = candid.position;
-                item.candidate.Clear();
-                bin.items.Add(item);
-            }
-        }
-
-        public void pack(bool bigger_first = false, bool distribute_items = false, int number_of_decimals= Utils.DEFAULT_NUMBER_OF_DECIMALS)
-        {
-            foreach(Bin bin in this.bins)
-            {
-                bin.format_numbers(number_of_decimals);
-            }
-
-            foreach(Item item in this.items)
-            {
-                item.format_numbers(number_of_decimals);
-            }
-
-            List<Item> tmp = this.items.OrderBy(i => -i.get_volume()).ToList();
-
-            foreach(Bin bin in this.bins)
-            {
-                foreach(Item item in tmp)
-                {
-                    this.pack_to_bin(bin, item);
-                }
-
-                BinInfo bininfo = new BinInfo();
-                List<ItemInfo> fitlist = new List<ItemInfo>();
-                List<ItemInfo> unfitlist = new List<ItemInfo>();
-                bininfo.bininfo = bin.@string();
-                bininfo.binindex = bin.index;
-
-                foreach(Item item in bin.items)
-                {
-                    fitlist.Add(item.@string());
-                }
-
-                foreach(Item item in bin.unfitted_items)
-                {
-                    unfitlist.Add(item.@string());
-                }
-
-                bininfo.fitlist = fitlist;
-                bininfo.unfitlist = unfitlist;
-                bininfo.binvolusage = bin.get_bin_vol_usage();
-                bininfo.itemvolusage = bin.get_item_vol_usage();
-
-                bin.result = bininfo;
-
-                if (distribute_items)
-                {
-                    foreach(Item item in bin.items)
-                    {
-                        this.items.Remove(item);
-                    }
-                }
-            }
+            return retlist;
         }
     }
 
@@ -519,13 +322,13 @@ namespace WarehousePacking.Models
 
             decimal ix = Math.Max(cx1, cx2) - Math.Min(cx1, cx2);
             decimal iy = Math.Max(cy1, cy2) - Math.Min(cy1, cy2);
-            
+
             return ix < (d1[x] + d2[x]) / 2 & iy < (d1[y] + d2[y]) / 2;
         }
 
         public static bool intersect(Item item1, Item item2)
         {
-            return (rect_intersect(item1, item2, Axis.WIDTH, Axis.HEIGHT) & 
+            return (rect_intersect(item1, item2, Axis.WIDTH, Axis.HEIGHT) &
                     rect_intersect(item1, item2, Axis.HEIGHT, Axis.DEPTH) &
                     rect_intersect(item1, item2, Axis.WIDTH, Axis.DEPTH));
         }

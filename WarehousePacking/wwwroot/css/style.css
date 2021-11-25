@@ -131,6 +131,8 @@
     flex: none;
     order: 1;
     flex-grow: 0;
+    pointer-events: none;
+    opacity: 0.2;
 }
 
 .resultview:hover {

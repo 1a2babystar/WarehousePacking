@@ -59,6 +59,7 @@ const Testdata = {
 
 init();
 animate();
+CalculateStart();
 
 $("#hidecontainer").click(function () {
     if (shcontainer) {
@@ -171,6 +172,7 @@ $("#AddCargo").click(function () {
 });
 
 $("#CalculatePacking").click(function () {
+    CalculateStart();
     CalculatePacking();
 })
 
@@ -283,6 +285,7 @@ function CalculatePacking() {
             console.log(data);
             Resultlist = data;
             SetAdditionalInfo();
+            CalculateComplete();
         },
     });
 }
@@ -428,4 +431,18 @@ function RemovePallet() {
         obj = scene.children.find(obj => obj.name == `palletb${j}`)
         scene.remove(obj);
     }
+}
+
+function CalculateStart() {
+    $(".resultview").css("pointer-events", "none");
+    $(".resultview").css("opacity", "0.2");
+    $("#completeinfo").css("display", "none");
+    //$(".resultview").css("cursor", "not allowed");
+}
+
+function CalculateComplete() {
+    $(".resultview").css("pointer-events", "auto");
+    $(".resultview").css("opacity", "1");
+    $("#completeinfo").css("display", "inline");
+    //$(".resultview").css("cursor", "auto");
 }
