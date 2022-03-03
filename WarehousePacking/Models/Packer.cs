@@ -18,6 +18,7 @@ namespace WarehousePacking.Models
         public decimal weight { get; set; }
         public int rotation_type { get; set; }
         public List<decimal> position { get; set; }
+        public List<decimal> position_p { get; set; }
         public List<Candidate> candidate { get; set; }
         public int number_of_decimals { get; set; }
         public List<int> rotation_allow { get; set; }
@@ -152,6 +153,8 @@ namespace WarehousePacking.Models
         public decimal max_weight { get; set; }
         public List<Item> items { get; set; }
         public List<Item> unfitted_items { get; set; }
+        public List<List<decimal>> can_pos { get; set; }
+        public decimal remain_volume { get; set; }
         public int index { get; set; }
         public int number_of_decimals { get; set; }
         public BinInfo result { get; set; }
@@ -164,8 +167,10 @@ namespace WarehousePacking.Models
             this.depth = depth;
             this.max_weight = max_weight;
             this.index = index;
+            this.remain_volume = width * height * depth;
             this.items = new List<Item>();
             this.unfitted_items = new List<Item>();
+            this.can_pos = new List<List<decimal>>();
             this.number_of_decimals = Utils.DEFAULT_NUMBER_OF_DECIMALS;
         }
 
