@@ -85,9 +85,12 @@ $("#ContainerInfo").on('click', '.resultview', function (e) {
     RemoveElement();
     var rowIndex = $(this).closest('tr').index();
     ProcessInfo['index'] = rowIndex;
+    ProcessInfo['binorder'] = 0;
     ProcessInfo['count'] = 0;
     shcontainer = 1;
     var obj = Resultlist.find(obj => obj.binindex == rowIndex)
+    var item = obj.information[0];
+    document.getElementById('containertype').innerHTML = `Type 1 (x ${item.count})`;
     var bin = obj.bininfo
     AddContainer(bin.width, bin.height, bin.depth);
     camera.position.set(bin.height * 1.5, bin.depth * 1.5, bin.width * 1.5)
@@ -122,9 +125,10 @@ function ResetCargoIndex() {
 
 $("#gobtn").click(function () {
     let rowIndex = ProcessInfo['index'];
+    let binorder = ProcessInfo['binorder'];
     let count = ProcessInfo['count']
     var obj = Resultlist.find(obj => obj.binindex == rowIndex);
-    var iteminfo = obj.fitlist;
+    var iteminfo = obj.information[binorder].fitlist;
     if (iteminfo.length <= count) return
     var bin = obj.bininfo
     origin = [-bin.width / 2, -bin.height / 2, -bin.depth / 2];
@@ -138,6 +142,40 @@ $("#backbtn").click(function () {
     obj = scene.children.find(obj => obj.name == `${ProcessInfo['count'] - 1}`)
     scene.remove(obj);
     ProcessInfo['count'] -= 1;
+})
+
+$("#prevcontainer").click(function () {
+    let rowIndex = ProcessInfo['index']
+    let obj = Resultlist.find(obj => obj.binindex == rowIndex);
+    if (ProcessInfo['binorder'] == 0) return
+    RemoveElement();
+    ProcessInfo['binorder'] -= 1;
+    ProcessInfo['count'] = 0;
+    let binorder = ProcessInfo['binorder'];
+    var item = obj.information[binorder];
+    document.getElementById('containertype').innerHTML = `Type ${binorder + 1} (x ${item.count})`;
+    shcontainer = 1;
+    var bin = obj.bininfo
+    AddContainer(bin.width, bin.height, bin.depth);
+    camera.position.set(bin.height * 1.5, bin.depth * 1.5, bin.width * 1.5)
+    light.position.set(bin.height * 10, bin.depth * 10, bin.width * 10)
+})
+
+$("#nextcontainer").click(function () {
+    let rowIndex = ProcessInfo['index']
+    let obj = Resultlist.find(obj => obj.binindex == rowIndex);
+    if (obj.information.length - 1 == ProcessInfo['binorder']) return
+    RemoveElement();
+    ProcessInfo['binorder'] += 1;
+    ProcessInfo['count'] = 0;
+    let binorder = ProcessInfo['binorder'];
+    var item = obj.information[binorder];
+    document.getElementById('containertype').innerHTML = `Type ${binorder + 1} (x ${item.count})`;
+    shcontainer = 1;
+    var bin = obj.bininfo
+    AddContainer(bin.width, bin.height, bin.depth);
+    camera.position.set(bin.height * 1.5, bin.depth * 1.5, bin.width * 1.5)
+    light.position.set(bin.height * 10, bin.depth * 10, bin.width * 10)
 })
 
 $("#AddContainer").click(function () {
@@ -213,8 +251,9 @@ function init() {
     scene.background = new THREE.Color(0xf0f0f0);
     scene.add(camera)
 
-    ProcessInfo['index'] = 0
-    ProcessInfo['count'] = 0
+    ProcessInfo['index'] = 0;
+    ProcessInfo['binorder'] = 0;
+    ProcessInfo['count'] = 0;
 
     // const axesHelper = new THREE.AxesHelper( 100 );
     // scene.add( axesHelper );
@@ -284,10 +323,18 @@ function CalculatePacking() {
         success: function (data) {
             console.log(data);
             Resultlist = data;
+            Resultlist.forEach(tempfunc);
             SetAdditionalInfo();
             CalculateComplete();
         },
     });
+}
+
+function tempfunc(info) {
+    info.fitlist = info.information[0].fitlist;
+    info.binvolusage = info.information[0].binvolusage;
+    info.itemvolusage = info.information[0].itemvolusage;
+    info.count = info.information[0].count;
 }
 
 function SetAdditionalInfo() {
@@ -297,14 +344,16 @@ function SetAdditionalInfo() {
         let obj = Resultlist.find(obj => obj.binindex == i + 1)
         let containervolusage = parseFloat(obj.binvolusage)
         let cargovolusage = parseFloat(obj.itemvolusage)
+        let count = obj.count;
         let itemcount = obj.fitlist.length
-        let unfititemcount = obj.unfitlist.length
+        let unfititemcount = 0;
         $('#AdditionalTable').append($('<tr style="font-size: 17px; margin-top: 5px" class="infolabel">')
             .append($('<td>').append(`${i + 1}`))
             .append($('<td>').append(`${containervolusage.toFixed(2)}%`))
             .append($('<td>').append(`${cargovolusage.toFixed(2)}%`))
             .append($('<td>').append(`${itemcount}`))
             .append($('<td>').append(`${unfititemcount}`))
+            .append($('<td>').append(`${count}`))
         )
     }
 }

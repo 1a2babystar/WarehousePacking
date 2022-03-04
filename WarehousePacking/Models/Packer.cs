@@ -21,9 +21,11 @@ namespace WarehousePacking.Models
         public List<decimal> position_p { get; set; }
         public List<Candidate> candidate { get; set; }
         public int number_of_decimals { get; set; }
+        public int packed { get; set; }
+        public int count { get; set; }
         public List<int> rotation_allow { get; set; }
 
-        public Item(string name, decimal width, decimal height, decimal depth, decimal weight, string rotationinfo)
+        public Item(string name, decimal width, decimal height, decimal depth, decimal weight, string rotationinfo, int count)
         {
             this.name = name;
             this.width = width;
@@ -34,6 +36,8 @@ namespace WarehousePacking.Models
             this.position = Utils.START_POSITION;
             this.candidate = new List<Candidate> { };
             this.number_of_decimals = Utils.DEFAULT_NUMBER_OF_DECIMALS;
+            this.packed = 0;
+            this.count = count;
             switch (rotationinfo)
             {
                 case "width":
@@ -49,6 +53,17 @@ namespace WarehousePacking.Models
                     this.rotation_allow = RotationType.ALL;
                     break;
             }
+        }
+
+        public Item ShallowCopy()
+        {
+            Item ret = (Item)this.MemberwiseClone();
+            ret.rotation_type = 0;
+            ret.position = Utils.START_POSITION;
+            ret.candidate.Clear();
+            ret.packed = 0;
+            return ret;
+
         }
 
         public void format_numbers(int number_of_decimals)
@@ -153,8 +168,9 @@ namespace WarehousePacking.Models
         public decimal max_weight { get; set; }
         public List<Item> items { get; set; }
         public List<Item> unfitted_items { get; set; }
+        public int count { get; set; }
+        public bool itemcomplete { get; set; }
         public List<List<decimal>> can_pos { get; set; }
-        public decimal remain_volume { get; set; }
         public int index { get; set; }
         public int number_of_decimals { get; set; }
         public BinInfo result { get; set; }
@@ -167,11 +183,22 @@ namespace WarehousePacking.Models
             this.depth = depth;
             this.max_weight = max_weight;
             this.index = index;
-            this.remain_volume = width * height * depth;
+            this.itemcomplete = false;
             this.items = new List<Item>();
             this.unfitted_items = new List<Item>();
             this.can_pos = new List<List<decimal>>();
             this.number_of_decimals = Utils.DEFAULT_NUMBER_OF_DECIMALS;
+        }
+
+        public Bin ShallowCopy()
+        {
+            Bin ret = (Bin)this.MemberwiseClone();
+            ret.items.Clear();
+            ret.unfitted_items.Clear();
+            ret.count = 0;
+            ret.itemcomplete = false;
+            ret.can_pos.Clear();
+            return ret;
         }
 
         public void format_numbers(int number_of_decimals)
@@ -204,7 +231,7 @@ namespace WarehousePacking.Models
             }
             foreach (Item item in this.unfitted_items)
             {
-                total_volume += item.get_volume();
+                total_volume += item.get_volume() * item.count;
             }
             return fit_volume / total_volume * 100;
         }
@@ -258,11 +285,7 @@ namespace WarehousePacking.Models
 
             foreach (Cargo cargo in cargoinfo)
             {
-                int count = cargo.CargoCount;
-                for (var i = 0; i < count; i++)
-                {
-                    this.add_item(new Item(cargo.CargoName, (decimal)cargo.CargoWidth, (decimal)cargo.CargoHeight, (decimal)cargo.CargoDepth, (decimal)cargo.CargoWeight, cargo.CargoRotationInfo));
-                }
+                this.add_item(new Item(cargo.CargoName, (decimal)cargo.CargoWidth, (decimal)cargo.CargoHeight, (decimal)cargo.CargoDepth, (decimal)cargo.CargoWeight, cargo.CargoRotationInfo, cargo.CargoCount));
             }
         }
         public void add_bin(Bin bin)

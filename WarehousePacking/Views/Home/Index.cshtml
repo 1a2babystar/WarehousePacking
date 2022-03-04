@@ -97,6 +97,7 @@
                     <td>Item Usage</td>
                     <td>#Item Packed</td>
                     <td>#Item Unpacked</td>
+                    <td>Count</td>
                 </tr>
             </table>
         </div>
@@ -111,6 +112,7 @@
             <div class="modal-content">
                 <div id="modaltitle" class="modal-header" style="border-bottom-width: 90%;">
                     Packing Result
+                    <div style="margin-right: 12%;" id="containertype"></div>
                     <div id="closemodal" data-bs-toggle="modal" data-bs-target="#PackedContainer" class="CloseModal"><img src="~/SVG/close.svg"></div>
                 </div>
                 <div class="modal-body" id="PackedResult">
@@ -118,7 +120,8 @@
                     <div id="gobtn" class="stepbtn"><img src="~/SVG/chevron-right.png"></div>
                 </div>
                 <div class="modal-footer">
-                    <div></div>
+                    <div id="prevcontainer" class="choosecontainer"><img src="~/SVG/chevron-left.png"></div>
+                    <div id="nextcontainer" class="choosecontainer" style="margin-left: 20%;"><img src="~/SVG/chevron-right.png"></div>
                     <div style="width: 150px;" id="hidecontainer"><div class="resultbtntext">Container/Pallet</div></div>
                 </div>
             </div>

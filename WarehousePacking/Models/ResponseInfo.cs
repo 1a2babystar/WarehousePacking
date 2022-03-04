@@ -23,8 +23,14 @@ namespace WarehousePacking.Models
     {
         public BasicBinInfo bininfo { get; set; }
         public int binindex { get; set; }
+        public List<OneBinInfo> information { get; set; }
+        public List<ItemInfo> unfittedlist { get; set; }
+    }
+
+    public class OneBinInfo
+    {
         public List<ItemInfo> fitlist { get; set; }
-        public List<ItemInfo> unfitlist { get; set; }
+        public int count { get; set; }
         public decimal binvolusage { get; set; }
         public decimal itemvolusage { get; set; }
     }

@@ -36,31 +36,29 @@ namespace WarehousePacking.Models
 
             foreach (Bin bin in this.bins)
             {
-                foreach (Item item in tmp)
-                {
-                    this.pack_to_bin(bin, item);
-                }
-
                 BinInfo bininfo = new BinInfo();
-                List<ItemInfo> fitlist = new List<ItemInfo>();
-                List<ItemInfo> unfitlist = new List<ItemInfo>();
+                bininfo.information = new List<OneBinInfo>();
                 bininfo.bininfo = bin.@string();
                 bininfo.binindex = bin.index;
 
-                foreach (Item item in bin.items)
+                List<Item> foritems = tmp;
+
+                while (foritems.Any())
                 {
-                    fitlist.Add(item.@string());
+                    Bin tmpbin = bin.ShallowCopy();
+                    pack_one_bin(tmpbin, foritems, bininfo);
+                    foritems = tmpbin.unfitted_items.OrderBy(i => -i.get_volume()).ToList();
+                    //if (!tmpbin.items.Any() && tmpbin.unfitted_items.Any()) break;
                 }
 
-                foreach (Item item in bin.unfitted_items)
-                {
-                    unfitlist.Add(item.@string());
-                }
-
-                bininfo.fitlist = fitlist;
-                bininfo.unfitlist = unfitlist;
-                bininfo.binvolusage = bin.get_bin_vol_usage();
-                bininfo.itemvolusage = bin.get_item_vol_usage();
+                //if (foritems.Any())
+                //{
+                //    bininfo.unfittedlist = new List<ItemInfo>();
+                //    foreach (Item item in foritems)
+                //    {
+                //        bininfo.unfittedlist.Add(item.@string());
+                //    }
+                //}
 
                 bin.result = bininfo;
 
@@ -73,14 +71,74 @@ namespace WarehousePacking.Models
                 }
             }
         }
-        public void pack_to_bin(Bin bin, Item item)
+        public void pack_one_bin(Bin bin, List<Item> items, BinInfo bininfo)
         {
-            if(bin.remain_volume < item.get_volume())
+            foreach (Item item in items)
             {
-                bin.unfitted_items.Add(item);
-                return;
+                Item temitem = item.ShallowCopy();
+                while (temitem.packed != temitem.count)
+                {
+                    bool result = this.pack_to_bin(bin, temitem.ShallowCopy());
+                    if (!result)
+                    {
+                        bin.unfitted_items.Add(temitem);
+                        break;
+                    }
+                    else
+                    {
+                        temitem.packed += 1;
+                    }
+                }
+                if(temitem.packed == temitem.count)
+                {
+                    bin.itemcomplete = true;
+                }
             }
 
+            //if (!bin.items.Any()) return;
+
+            List<int> residue = new List<int>();
+            int binnum = 1;
+            if (!bin.itemcomplete)
+            {
+                foreach (Item item in bin.unfitted_items)
+                {
+                    int num_candid = item.count / item.packed;
+                    residue.Add(num_candid);
+                }
+                binnum = residue.Min(z => z);
+            }
+
+            OneBinInfo onebininfo = new OneBinInfo();
+            onebininfo.binvolusage = bin.get_bin_vol_usage();
+            onebininfo.itemvolusage = bin.get_item_vol_usage();
+            onebininfo.count = binnum;
+            List<ItemInfo> fitlist = new List<ItemInfo>();
+
+            foreach (Item item in bin.items)
+            {
+                fitlist.Add(item.@string());
+            }
+
+            onebininfo.fitlist = fitlist;
+            bininfo.information.Add(onebininfo);
+
+            List<Item> tlist = new List<Item>();
+            foreach(Item item in bin.unfitted_items)
+            {
+                item.count -= binnum * item.packed;
+                if(item.count == 0)
+                {
+                    tlist.Add(item);
+                }
+            }
+            foreach(Item aitem in tlist)
+            {
+                bin.unfitted_items.Remove(aitem);
+            }
+        }
+        public bool pack_to_bin(Bin bin, Item item)
+        {
             if (bin.items.Count == 0)
             {
                 put_item(bin, item, Utils.START_POSITION);
@@ -92,7 +150,7 @@ namespace WarehousePacking.Models
             }
             if (item.candidate.Count == 0)
             {
-                bin.unfitted_items.Add(item);
+                return false;
             }
             else
             {
@@ -111,7 +169,7 @@ namespace WarehousePacking.Models
                 bin.can_pos.Add(new List<decimal> { candid.position[0], item.position_p[1], candid.position[2] });
                 bin.can_pos.Add(new List<decimal> { candid.position[0], candid.position[1], item.position_p[2] });
                 bin.items.Add(item);
-                bin.remain_volume -= item.get_volume();
+                return true;
             }
         }
 
