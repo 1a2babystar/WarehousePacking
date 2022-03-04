@@ -48,17 +48,25 @@ namespace WarehousePacking.Models
                     Bin tmpbin = bin.ShallowCopy();
                     pack_one_bin(tmpbin, foritems, bininfo);
                     foritems = tmpbin.unfitted_items.OrderBy(i => -i.get_volume()).ToList();
-                    //if (!tmpbin.items.Any() && tmpbin.unfitted_items.Any()) break;
+                    if (!tmpbin.items.Any() && tmpbin.unfitted_items.Any()) break;
                 }
 
-                //if (foritems.Any())
-                //{
-                //    bininfo.unfittedlist = new List<ItemInfo>();
-                //    foreach (Item item in foritems)
-                //    {
-                //        bininfo.unfittedlist.Add(item.@string());
-                //    }
-                //}
+                if (foritems.Any())
+                {
+                    bininfo.unfitcount = 0;
+                    foreach (Item item in foritems)
+                    {
+                        bininfo.unfitcount += item.count;
+                    }
+                }
+
+                foreach(OneBinInfo onebininfo in bininfo.information)
+                {
+                    bininfo.count += onebininfo.count;
+                    bininfo.itemcount += onebininfo.fitlist.Count() * onebininfo.count;
+                }
+
+                bininfo.binvolusage = 70;
 
                 bin.result = bininfo;
 
@@ -95,7 +103,7 @@ namespace WarehousePacking.Models
                 }
             }
 
-            //if (!bin.items.Any()) return;
+            if (!bin.items.Any()) return;
 
             List<int> residue = new List<int>();
             int binnum = 1;
@@ -103,6 +111,7 @@ namespace WarehousePacking.Models
             {
                 foreach (Item item in bin.unfitted_items)
                 {
+                    if (item.packed == 0) continue;
                     int num_candid = item.count / item.packed;
                     residue.Add(num_candid);
                 }
@@ -120,7 +129,7 @@ namespace WarehousePacking.Models
                 fitlist.Add(item.@string());
             }
 
-            onebininfo.fitlist = fitlist;
+            onebininfo.fitlist = fitlist.OrderBy(i => i.position[2]).ThenBy(i => i.position[0]).ThenBy(i => i.position[1]).ToList();
             bininfo.information.Add(onebininfo);
 
             List<Item> tlist = new List<Item>();

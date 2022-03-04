@@ -5,7 +5,7 @@ let cargomaterial
 let Resultlist
 let ProcessInfo = {}
 let textureloader
-let shcontainer = 1
+let shcontainer = 0;
 let pallethorizontal, palletvertical, palletmiddle, palletbottom
 let light
 
@@ -87,12 +87,12 @@ $("#ContainerInfo").on('click', '.resultview', function (e) {
     ProcessInfo['index'] = rowIndex;
     ProcessInfo['binorder'] = 0;
     ProcessInfo['count'] = 0;
-    shcontainer = 1;
+    shcontainer = 0;
     var obj = Resultlist.find(obj => obj.binindex == rowIndex)
     var item = obj.information[0];
     document.getElementById('containertype').innerHTML = `Type 1 (x ${item.count})`;
     var bin = obj.bininfo
-    AddContainer(bin.width, bin.height, bin.depth);
+    SetPallet(bin.width, bin.height, bin.depth);
     camera.position.set(bin.height * 1.5, bin.depth * 1.5, bin.width * 1.5)
     light.position.set(bin.height * 10, bin.depth * 10, bin.width * 10)
 });
@@ -154,9 +154,9 @@ $("#prevcontainer").click(function () {
     let binorder = ProcessInfo['binorder'];
     var item = obj.information[binorder];
     document.getElementById('containertype').innerHTML = `Type ${binorder + 1} (x ${item.count})`;
-    shcontainer = 1;
+    shcontainer = 0;
     var bin = obj.bininfo
-    AddContainer(bin.width, bin.height, bin.depth);
+    SetPallet(bin.width, bin.height, bin.depth);
     camera.position.set(bin.height * 1.5, bin.depth * 1.5, bin.width * 1.5)
     light.position.set(bin.height * 10, bin.depth * 10, bin.width * 10)
 })
@@ -171,9 +171,9 @@ $("#nextcontainer").click(function () {
     let binorder = ProcessInfo['binorder'];
     var item = obj.information[binorder];
     document.getElementById('containertype').innerHTML = `Type ${binorder + 1} (x ${item.count})`;
-    shcontainer = 1;
+    shcontainer = 0;
     var bin = obj.bininfo
-    AddContainer(bin.width, bin.height, bin.depth);
+    SetPallet(bin.width, bin.height, bin.depth);
     camera.position.set(bin.height * 1.5, bin.depth * 1.5, bin.width * 1.5)
     light.position.set(bin.height * 10, bin.depth * 10, bin.width * 10)
 })
@@ -323,18 +323,10 @@ function CalculatePacking() {
         success: function (data) {
             console.log(data);
             Resultlist = data;
-            Resultlist.forEach(tempfunc);
             SetAdditionalInfo();
             CalculateComplete();
         },
     });
-}
-
-function tempfunc(info) {
-    info.fitlist = info.information[0].fitlist;
-    info.binvolusage = info.information[0].binvolusage;
-    info.itemvolusage = info.information[0].itemvolusage;
-    info.count = info.information[0].count;
 }
 
 function SetAdditionalInfo() {
@@ -345,15 +337,17 @@ function SetAdditionalInfo() {
         let containervolusage = parseFloat(obj.binvolusage)
         let cargovolusage = parseFloat(obj.itemvolusage)
         let count = obj.count;
-        let itemcount = obj.fitlist.length
-        let unfititemcount = 0;
+        let itemcount = obj.itemcount;
+        let unfititemcount = obj.unfitcount;
         $('#AdditionalTable').append($('<tr style="font-size: 17px; margin-top: 5px" class="infolabel">')
             .append($('<td>').append(`${i + 1}`))
-            .append($('<td>').append(`${containervolusage.toFixed(2)}%`))
-            .append($('<td>').append(`${cargovolusage.toFixed(2)}%`))
             .append($('<td>').append(`${itemcount}`))
             .append($('<td>').append(`${unfititemcount}`))
             .append($('<td>').append(`${count}`))
+            //.append($('<td>').append(`${containervolusage.toFixed(2)}%`))
+            //.append($('<td>').append(`${Itemvolusage.toFixed(2)}%`))
+            .append($('<td>').append(` `))
+            .append($('<td>').append(` `))
         )
     }
 }
