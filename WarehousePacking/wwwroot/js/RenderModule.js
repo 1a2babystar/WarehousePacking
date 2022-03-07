@@ -8,6 +8,10 @@ let textureloader
 let shcontainer = 0;
 let pallethorizontal, palletvertical, palletmiddle, palletbottom
 let light
+let pdfpara = {
+    imageleft: true,
+    line: 10
+}
 
 const Testdata = {
     Container: [
@@ -84,9 +88,9 @@ $("#hidecontainer").click(function () {
 $("#ContainerInfo").on('click', '.resultview', function (e) {
     RemoveElement();
     var rowIndex = $(this).closest('tr').index();
-    ProcessInfo['index'] = rowIndex;
-    ProcessInfo['binorder'] = 0;
-    ProcessInfo['count'] = 0;
+    processinfo['index'] = rowindex;
+    processinfo['binorder'] = 0;
+    processinfo['count'] = 0;
     shcontainer = 0;
     var obj = Resultlist.find(obj => obj.binindex == rowIndex)
     var item = obj.information[0];
@@ -329,13 +333,101 @@ function CalculatePacking() {
     });
 }
 
+function create() {
+    let doc = new jsPDF();
+    PdfWrite(doc, "Packing     Result", 85)
+    let containercount = Resultlist.length;
+    let container;
+    let type;
+    let bininfo;
+    let img;
+    let image;
+    debugger;
+    //for (let i = 0; i < containercount; i++) {
+    //    debugger;
+    //    container = Resultlist[i];
+    //    bininfo = container.bininfo;
+    //    PdfWrite(doc, bininfo.name, 10);
+    //    for (let j = 0; j < container.information.length; j++) {
+    //        //SetPallet(bininfo.width, bininfo.height, bininfo.depth);
+    //        //camera.position.set(bininfo.height * 1.5, bininfo.depth * 1.5, bininfo.width * 1.5);
+    //        type = container.information[j];
+    //        PdfWrite(doc, `Type ${j + 1}`, 10);
+    //        for (let k = 0; k < type.fitlist.length; k++) {
+    //            origin = [-bininfo.width / 2, -bininfo.height / 2, -bininfo.depth / 2];
+    //            AddCargo(type.fitlist[k], k);
+    //            img = renderer.domElement;
+    //            image = img.toDataURL();
+    //            PdfaddImage(doc, image);
+    //        }
+    //        RemoveElement();
+    //    }
+    //}
+    $('#PackedContainer').modal('show');
+    SetPallet(20, 20, 20);
+    camera.position.set(30, 30, 30);
+    $('#PackedContainer').modal('hide');
+    img = renderer.domElement
+    image = img.toDataURL();
+    PdfaddImage(doc, image);
+    doc.save();
+    pdfpara.line = 10;
+    pdfpara.imageleft = true;
+}
+
+function PdfWrite(doc, content, x) {
+    doc.text(content, x, pdfpara.line);
+    pdfpara.line += 10;
+    pdfpara.imageleft = true;
+}
+
+function PdfaddImage(doc, image) {
+    if (pdfpara.imageleft) {
+        doc.addImage(image, 'PNG', 5, pdfpara.line, 96, 48);
+    }
+    else {
+        pdfpara.line -= 58;
+        doc.addImage(image, 'PNG', 108, pdfpara.line, 96, 48);
+    }
+    pdfpara.line += 58;
+    pdfpara.imageleft = !(pdfpara.imageleft);
+}
+
+function CreateSummary() {
+    let doc = new jsPDF();
+    let containercount = Resultlist.length;
+    let cargos;
+    let cargocount;
+    let cargoinfo;
+    let title;
+    pdfpara.line = 10;
+    PdfWrite(doc, "                                                   Result");
+    pdfpara.line += 10;
+    for (i = 0; i < containercount; i++) {
+        cargos = Resultlist[i]['fitlist'];
+        cargocount = cargos.length;
+        title = "";
+        title += Resultlist[i]['bininfo']['name'] + ": ";
+        title += "volume usage: " + Resultlist[i]['binvolusage'].toFixed(2) + "% ";
+        title += "item usage: " + Resultlist[i]['itemvolusage'].toFixed(2) + "% ";
+        PdfWrite(doc, title);
+        for (j = 0; j < cargocount; j++) {
+            cargoinfo = "name: " + cargos[j]["name"] + " ";
+            cargoinfo += "position: " + cargos[j]['position'] + " ";
+            PdfWrite(doc, cargoinfo);
+        }
+        pdfpara.line += 10;
+    }
+    doc.save("a4.pdf");
+}
+
 function SetAdditionalInfo() {
     $('#AdditionalTable tr:gt(0)').remove();
     let containercount = Resultlist.length
     for (i = 0; i < containercount; i++) {
         let obj = Resultlist.find(obj => obj.binindex == i + 1)
-        let containervolusage = parseFloat(obj.binvolusage)
-        let cargovolusage = parseFloat(obj.itemvolusage)
+        let containervolusage;
+        let cargovolusage;
         let count = obj.count;
         let itemcount = obj.itemcount;
         let unfititemcount = obj.unfitcount;
@@ -344,11 +436,25 @@ function SetAdditionalInfo() {
             .append($('<td>').append(`${itemcount}`))
             .append($('<td>').append(`${unfititemcount}`))
             .append($('<td>').append(`${count}`))
-            //.append($('<td>').append(`${containervolusage.toFixed(2)}%`))
-            //.append($('<td>').append(`${Itemvolusage.toFixed(2)}%`))
             .append($('<td>').append(` `))
             .append($('<td>').append(` `))
         )
+        let item;
+        for (j = 0; j < obj.information.length; j++) {
+            item = obj.information[j];
+            containervolusage = item.binvolusage;
+            cargovolusage = item.itemvolusage;
+            itemcount = item.fitlist.length;
+            count = item.count;
+            $('#AdditionalTable').append($('<tr style="font-size: 17px; margin-top: 5px" class="infolabel">')
+                .append($('<td>').append(`Type ${j + 1}`))
+                .append($('<td>').append(`${itemcount}`))
+                .append($('<td>').append(` `))
+                .append($('<td>').append(`${count}`))
+                .append($('<td>').append(`${containervolusage.toFixed(2)}%`))
+                .append($('<td>').append(`${cargovolusage.toFixed(2)}%`))
+            )
+        }
     }
 }
 
