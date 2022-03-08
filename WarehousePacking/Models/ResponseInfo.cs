@@ -17,6 +17,7 @@ namespace WarehousePacking.Models
         public decimal depth { get; set; }
         public List<decimal> position { get; set; }
         public string rotation { get; set; }
+        public string color { get; set; }
     }
 
     public class BinInfo

@@ -22,7 +22,6 @@
         <table id="CargoInfo">
             <tr class="infolabel">
                 <td><div class="countcol">#</div></td>
-                @*<td>color</td>*@
                 <td>Cargo Name</td>
                 <td>Width</td>
                 <td>Height</td>
@@ -30,11 +29,11 @@
                 <td>weight</td>
                 <td>Count</td>
                 <td>Rotation Info</td>
+                <td>color</td>
                 <td></td>
             </tr>
             <tr>
                 <td><div class="countcol">1</div></td>
-                @*<td><div class="cargocolor"></div></td>*@
                 <td><input placeholder="name" class="inputfield CargoName" type="text" /></td>
                 <td><input placeholder="width" class="inputfield CargoWidth" type="number" /></td>
                 <td><input placeholder="height" class="inputfield CargoHeight" type="number" /></td>
@@ -49,6 +48,7 @@
                         <option value="height">By Height</option>
                     </select>
                 </td>
+                <td><div style="width: 70px"><div class="CargoColor"></div></div></td>
                 <td></td>
             </tr>
         </table>

@@ -30,5 +30,6 @@ namespace WarehousePacking.Models
         public float CargoWeight { get; set; }
         public int CargoCount { get; set; }
         public string CargoRotationInfo { get; set; }
+        public string CargoColor { get; set; }
     }
 }

@@ -12,6 +12,7 @@ namespace WarehousePacking.Models
     public class Item
     {
         public string name { get; set; }
+        public string color { get; set; }
         public decimal width { get; set; }
         public decimal height { get; set; }
         public decimal depth { get; set; }
@@ -25,7 +26,7 @@ namespace WarehousePacking.Models
         public int count { get; set; }
         public List<int> rotation_allow { get; set; }
 
-        public Item(string name, decimal width, decimal height, decimal depth, decimal weight, string rotationinfo, int count)
+        public Item(string name, decimal width, decimal height, decimal depth, decimal weight, string rotationinfo, int count, string color)
         {
             this.name = name;
             this.width = width;
@@ -38,6 +39,7 @@ namespace WarehousePacking.Models
             this.number_of_decimals = Utils.DEFAULT_NUMBER_OF_DECIMALS;
             this.packed = 0;
             this.count = count;
+            this.color = color;
             switch (rotationinfo)
             {
                 case "width":
@@ -104,6 +106,7 @@ namespace WarehousePacking.Models
             iteminfo.depth = dim[2];
             iteminfo.position = this.position;
             iteminfo.rotation = get_rttype();
+            iteminfo.color = this.color;
             return iteminfo;
         }
 
@@ -285,7 +288,7 @@ namespace WarehousePacking.Models
 
             foreach (Cargo cargo in cargoinfo)
             {
-                this.add_item(new Item(cargo.CargoName, (decimal)cargo.CargoWidth, (decimal)cargo.CargoHeight, (decimal)cargo.CargoDepth, (decimal)cargo.CargoWeight, cargo.CargoRotationInfo, cargo.CargoCount));
+                this.add_item(new Item(cargo.CargoName, (decimal)cargo.CargoWidth, (decimal)cargo.CargoHeight, (decimal)cargo.CargoDepth, (decimal)cargo.CargoWeight, cargo.CargoRotationInfo, cargo.CargoCount, cargo.CargoColor));
             }
         }
         public void add_bin(Bin bin)

@@ -6,6 +6,7 @@ let Resultlist
 let ProcessInfo = {}
 let textureloader
 let shcontainer = 0;
+let boxtexture;
 let pallethorizontal, palletvertical, palletmiddle, palletbottom
 let light
 let pdfpara = {
@@ -88,9 +89,9 @@ $("#hidecontainer").click(function () {
 $("#ContainerInfo").on('click', '.resultview', function (e) {
     RemoveElement();
     var rowIndex = $(this).closest('tr').index();
-    processinfo['index'] = rowindex;
-    processinfo['binorder'] = 0;
-    processinfo['count'] = 0;
+    ProcessInfo['index'] = rowIndex;
+    ProcessInfo['binorder'] = 0;
+    ProcessInfo['count'] = 0;
     shcontainer = 0;
     var obj = Resultlist.find(obj => obj.binindex == rowIndex)
     var item = obj.information[0];
@@ -207,11 +208,21 @@ $("#AddCargo").click(function () {
         .append($('<td>').append(`<input placeholder="weight" class="inputfield CargoWeight" type="number" />`))
         .append($('<td>').append(`<input placeholder="count" class="inputfield CargoCount" type="number" />`))
         .append($('<td>').append(`<select class="inputfield CargoRotationInfo" "><option value="all">All</option><option value="depth">By Depth(regular)</option><option value="width">By Width</option><option value="height">By Height</option></select>`))
+        .append($('<td>').append(`<div style="width: 70px"><div class="CargoColor"></div></div>`))
         .append($('<td>').append(`<img class="deleterow" src="/SVG/delete.png">`))
     )
-
+    $(`table#CargoInfo tr:nth-child(${cargocount + 1}) .CargoColor`).css("background-color", getRandomColor());
     $(`table#CargoInfo tr:nth-child(${cargocount + 1}) .CargoRotationInfo`).change(Rerender);
 });
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
 
 $("#CalculatePacking").click(function () {
     CalculateStart();
@@ -266,8 +277,8 @@ function init() {
     LightSetup();
 
     textureloader = new THREE.TextureLoader()
-    const boxtexture = textureloader.load('/textures/box.jpg')
-    cargomaterial = new THREE.MeshBasicMaterial({ map: boxtexture });
+    boxtexture = textureloader.load('/textures/box.jpg')
+    //cargomaterial = new THREE.MeshBasicMaterial({ map: boxtexture });
 
     const pallettexture = textureloader.load('/textures/pallet.jpg')
     palletmaterial = new THREE.MeshBasicMaterial({ map: pallettexture });
@@ -315,6 +326,7 @@ function CalculatePacking() {
         onecargo['CargoWeight'] = $(`table#CargoInfo tr:nth-child(${i}) .CargoWeight`).val()
         onecargo['CargoCount'] = $(`table#CargoInfo tr:nth-child(${i}) .CargoCount`).val()
         onecargo['CargoRotationInfo'] = $(`table#CargoInfo tr:nth-child(${i}) .CargoRotationInfo`).val()
+        onecargo['CargoColor'] = $(`table#CargoInfo tr:nth-child(${i}) .CargoColor`).css("background-color");
         cargoinfo.push(onecargo)
     }
     data['ContainerInfo'] = containerinfo
@@ -333,46 +345,50 @@ function CalculatePacking() {
     });
 }
 
-function create() {
+async function create() {
     let doc = new jsPDF();
     PdfWrite(doc, "Packing     Result", 85)
     let containercount = Resultlist.length;
     let container;
     let type;
     let bininfo;
-    let img;
+    let img = renderer.domElement;
     let image;
     debugger;
-    //for (let i = 0; i < containercount; i++) {
-    //    debugger;
-    //    container = Resultlist[i];
-    //    bininfo = container.bininfo;
-    //    PdfWrite(doc, bininfo.name, 10);
-    //    for (let j = 0; j < container.information.length; j++) {
-    //        //SetPallet(bininfo.width, bininfo.height, bininfo.depth);
-    //        //camera.position.set(bininfo.height * 1.5, bininfo.depth * 1.5, bininfo.width * 1.5);
-    //        type = container.information[j];
-    //        PdfWrite(doc, `Type ${j + 1}`, 10);
-    //        for (let k = 0; k < type.fitlist.length; k++) {
-    //            origin = [-bininfo.width / 2, -bininfo.height / 2, -bininfo.depth / 2];
-    //            AddCargo(type.fitlist[k], k);
-    //            img = renderer.domElement;
-    //            image = img.toDataURL();
-    //            PdfaddImage(doc, image);
-    //        }
-    //        RemoveElement();
-    //    }
-    //}
-    $('#PackedContainer').modal('show');
-    SetPallet(20, 20, 20);
-    camera.position.set(30, 30, 30);
-    $('#PackedContainer').modal('hide');
-    img = renderer.domElement
-    image = img.toDataURL();
-    PdfaddImage(doc, image);
+    for (let i = 0; i < containercount; i++) {
+        container = Resultlist[i];
+        bininfo = container.bininfo;
+        PdfWrite(doc, bininfo.name, 10);
+        for (let j = 0; j < container.information.length; j++) {
+            SetPallet(bininfo.width, bininfo.height, bininfo.depth);
+            camera.position.set(bininfo.height * 1.5, bininfo.depth * 1.5, bininfo.width * 1.5);
+            type = container.information[j];
+            PdfWrite(doc, `Type ${j + 1}`, 10);
+            for (let k = 0; k < type.fitlist.length; k++) {
+                origin = [-bininfo.width / 2, -bininfo.height / 2, -bininfo.depth / 2];
+                AddCargo(type.fitlist[k], k);
+                image = img.toDataURL();
+                PdfaddImage(doc, image);
+            }
+            RemoveElement();
+        }
+    }
+    //SetPallet(20, 20, 20);
+    //camera.position.set(30, 30, 30);
+    //setTimeout(() => {
+    //    image = img.toDataURL();
+    //    PdfaddImage(doc, image);
+    //    doc.save();
+    //}, 100);
+    //image = img.toDataURL();
+    //PdfaddImage(doc, image);
     doc.save();
     pdfpara.line = 10;
     pdfpara.imageleft = true;
+}
+
+function delay(time) {
+    return new Promise(resolve => setTimeout(resolve, time));
 }
 
 function PdfWrite(doc, content, x) {
@@ -475,6 +491,7 @@ function AddContainer(width, height, depth) {
 }
 
 function AddCargo(item, count) {
+    let cargomaterial = new THREE.MeshBasicMaterial({ map: boxtexture, color: new THREE.Color(item.color) });
     const cargogeometry = new THREE.BoxGeometry(item.height, item.depth, item.width);
     const cargo = new THREE.Mesh(cargogeometry, cargomaterial)
     var posX = parseFloat(item.position[1]) + parseFloat(item.height / 2) + parseFloat(origin[1])

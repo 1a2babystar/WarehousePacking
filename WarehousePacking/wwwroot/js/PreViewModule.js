@@ -12,10 +12,6 @@ function SetPreviewCargo(rowIndex) {
     var height = $(`table#CargoInfo tr:nth-child(${rowIndex + 1}) .CargoHeight`).val()
     var depth = $(`table#CargoInfo tr:nth-child(${rowIndex + 1}) .CargoDepth`).val()
 
-    // var width = $(`#CargoWidth${rowIndex}`).val()
-    // var height = $(`#CargoHeight${rowIndex}`).val()
-    // var depth = $(`#CargoDepth${rowIndex}`).val()
-
     const cargogeometry = new THREE.BoxGeometry(height, depth, width);
     cargo = new THREE.Mesh(cargogeometry, material)
     cargo.position.set(0, 0, 0)
